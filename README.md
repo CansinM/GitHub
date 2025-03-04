@@ -104,6 +104,12 @@ node_modules/
 ```
 Bu dosyaları Git takip etmeyecek ve depoya eklemeyecektir.
 
+**Not:**
+Örnek node.js projeleri üzerinde gösterilmiştir. 
+- `node_modules/`: Node.js projelerinde bağımlılıkların bulunduğu klasördür, her makinede değişebilir ve versiyon kontrolüne alınmamalıdır.
+- `.env`: Çevresel değişkenleri içeren dosyalardır, API anahtarları gibi hassas bilgileri içerebilir.
+- `*.log`: Log dosyaları, hata kayıtları ve sistem çıktıları içerdiğinden genellikle Git’e eklenmez.
+
 ---
 ## 3. Git Branch
 
@@ -118,13 +124,13 @@ Yeni bir branch oluşturmak için:
 ```sh
 git branch feature-branch
 ```
-<img src="https://res.cloudinary.com/snyk/image/upload/v1615821731/wordpress-sync/image1-11.png" alt="Açıklama metni" width="500">
+<img src="https://res.cloudinary.com/snyk/image/upload/v1615821731/wordpress-sync/image1-11.png" alt="Branch" width="500">
 
 Branch'ler arası geçiş yapmak için :
 ```sh
 git checkout main
 ```
-Git’in daha yeni sürümünü kullanıyorsanız, checkout yerine switch komutu da kullanabilirsin:
+Git’in daha yeni sürümünü kullanıyorsanız, checkout yerine switch komutu da kullanabilirsiniz:
 ```sh
 git switch main
 ```
@@ -156,6 +162,13 @@ Bu yöntem, commit geçmişini daha temiz tutar.
    ```sh
    nano dosya.txt
    ```
+   **Not:** `nano`, terminal tabanlı bir metin editörüdür. Çatışmaları çözmek için dosyayı açtıktan sonra ilgili satırları düzenleyip kaydetmelisiniz. Alternatif olarak, `vim` veya `code` (VS Code) gibi editörler de kullanılabilir.
+
+   **Varsayılan Editör Seçme:**
+   Eğer `nano` dışında başka bir editörü kullanmak isterseniz, şu komutla varsayılan editörü değiştirebilirsiniz:
+   ```sh
+   git config --global core.editor "vim"
+   ```
 3. **Çözülen dosyayı ekleyerek commit atmak için:**
    ```sh
    git add dosya.txt
@@ -163,11 +176,30 @@ Bu yöntem, commit geçmişini daha temiz tutar.
    ```
 
 ### Stash
-Çalışmalarınızı kaydetmeden branch değiştirmek için kullanılır:
+Bazı durumlarda, değişiklikleri commit etmeden branch değiştirmek veya uzak depodaki güncellemeleri almak isteyebilirsiniz. `git stash` komutu, geçici olarak değişiklikleri kaydeder ve çalışma alanınızı temizler.
+
+**Temel Kullanım:**
 ```sh
 git stash
 ```
-Bu komut, değişiklikleri kaydeder ancak commit atmaz.
+Bu komut, izlenen dosyalardaki değişiklikleri saklar ve çalışma alanını temizler.
+
+**Saklanan Stash’leri Listeleme:**
+```sh
+git stash list
+```
+Bu komut, saklanan değişikliklerin bir listesini gösterir.
+
+**Özel Bir Mesaj ile Stash Kaydetme:**
+```sh
+git stash push -m "Çalıştığım özellik kodları"
+```
+
+**Tüm Stash’leri Temizleme:**
+```sh
+git stash clear
+```
+Bu komut, tüm stash’leri siler.
 
 ### Pop
 Kaydedilen stash’i tekrar geri yüklemek için:
@@ -177,15 +209,24 @@ git stash pop
 Böylece en son saklanan değişiklikler tekrar projeye uygulanır.
 
 ---
-
 ## 4. Git Geçmişe Dönme
 
+Git’te commit’lere geri dönmek için **commit hash** kullanılır. Her commit, benzersiz bir **hash kodu** ile temsil edilir.
+
+**Commit Hash Öğrenme:**
+```sh
+git log
+```
+Bu komut, commit geçmişini ve her commit’e ait kısa hash kodlarını listeler.
+
 ### Checkout
-Önceki commit’lere dönmek için `checkout` komutu kullanılır:
+**Belirli Bir Commit’e Gitmek İçin:**
 ```sh
 git checkout commit_hash
 ```
-Belirtilen commit’e dönerek geçmiş bir sürümde çalışabilirsiniz.
+
+**Hash Nedir?**
+Commit hash, Git’in her commit için ürettiği benzersiz bir kimliktir.
 
 ### Reset ve Revert
 **Reset**: Commit’i tamamen geri almak için kullanılır.
@@ -205,14 +246,23 @@ git diff
 Bu komut, değişiklikleri satır bazında gösterir.
 
 ### Rebase
-Branch’leri temiz bir şekilde birleştirmek için kullanılır:
+Commit geçmişini daha düzenli hale getirmek için kullanılır. Özellikle bir branch’in ana branch ile senkronize edilmesi gerektiğinde tercih edilir.
+
 ```sh
 git rebase main
 ```
-Bu işlem, branch geçmişini daha düzenli hale getirir.
+Bu komut, mevcut branch’i `main` branch’inin en güncel haliyle birleştirir. **Farkı:** `merge` gibi yeni bir merge commit oluşturmaz, tüm commit’leri en güncel branch’in üzerine ekler.
+
+📌 **Rebase vs Merge:**
+| Merge | Rebase |
+|--------|--------|
+| Yeni bir merge commit oluşturur | Commit geçmişini temiz ve sıralı tutar |
+| Tüm commit'ler korunur | Commit'lerin sıralaması değişebilir |
+| Karmaşıklık oluşturabilir | Daha temiz bir commit geçmişi sağlar |
+
+<img src="https://cms-assets.tutsplus.com/uploads/users/585/posts/23191/preview_image/preview.png" alt="Rebase" width="500">
 
 ---
-
 ## 5. GitHub
 
 ### GitHub Nedir?
@@ -248,9 +298,14 @@ Bu komutlar, yerel repository'yi GitHub'a bağlayarak dosyalarınızı yükler.
 ### Pull Request (PR)
 Pull request, değişiklikleri bir branch'ten ana branch'e veya başka bir branch'e birleştirmek için kullanılan bir taleptir.
 1. **Yeni bir branch oluşturun ve değişiklik yapın:**
+   Bir branch oluşturmak ve ona geçiş yapmak için aşağıdaki komut kullanılır:
    ```sh
    git checkout -b yeni-branch
    ```
+   **Detay:** Bu komut şu işlemleri yapar:
+   - Yeni bir `yeni-branch` adlı branch oluşturur.
+   - Otomatik olarak bu yeni branch’e geçiş yapar.
+
 2. **Commit yapın ve GitHub’a gönderin:**
    ```sh
    git add .
@@ -268,6 +323,14 @@ git fetch origin
 ```sh
 git pull origin main
 ```
+| Komut | Ne Yapar? | Çalışma Alanına Etkisi |
+|-------|----------|-----------------|
+| `git fetch` | Uzak depodaki değişiklikleri indirir ancak çalışma alanına uygulamaz | Çalışma alanı değişmez |
+| `git pull` | Uzak depodaki değişiklikleri indirir ve mevcut branch ile birleştirir | Çalışma alanı değişebilir |
+
+**Özet:**
+- `fetch`, değişiklikleri yalnızca indirir, birleştirme yapmaz.
+- `pull`, değişiklikleri indirir ve doğrudan mevcut branch’e uygular.
 
 ### Clone
 GitHub’daki bir projeyi bilgisayarınıza kopyalamak için:
@@ -280,7 +343,6 @@ Bu komut, belirtilen GitHub deposunun tam bir kopyasını oluşturur.
 Bir projeyi kopyalayarak kendi hesabınıza almak için **Fork** işlemi kullanılır. Bu, açık kaynak projelere katkı sağlamak için idealdir. Fork işlemi GitHub üzerinden yapılır ve proje kendi hesabınıza kopyalanır.
 
 ---
-
 ## 6. IDE'lerde Git Kullanımı
 
 Git, birçok popüler IDE (Entegre Geliştirme Ortamı) ile entegre olarak kullanılabilir. IDE üzerinden Git işlemleri yapmak, komut satırı kullanmaya kıyasla daha kolay ve görsel bir deneyim sunar.
